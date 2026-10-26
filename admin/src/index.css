@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+    background-image: radial-gradient(circle at 10% 20%, #ffe9be 0 2px, transparent 3px),
+      radial-gradient(circle at 70% 12%, #ffd9ec 0 2px, transparent 3px);
+    background-size: 140px 140px, 180px 180px;
+  }
+  ::selection {
+    @apply bg-lime text-ink;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-ink/25 rounded-full border-2 border-transparent bg-clip-padding;
+  }
+}
+
+@layer components {
+  .sticker {
+    @apply border-[3px] border-ink rounded-2xl shadow-sticker bg-white;
+  }
+  .btn-pop {
+    @apply transition-transform duration-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
+  }
+}
+
+.md-body {
+  @apply text-[14px] leading-relaxed;
+}
+.md-body h2 {
+  @apply font-fun text-lg mt-5 mb-2 border-l-[5px] border-lime pl-2;
+}
+.md-body h3 {
+  @apply font-bold mt-4 mb-2;
+}
+.md-body p {
+  @apply my-2;
+}
+.md-body ul {
+  @apply list-disc pl-6 my-2;
+}
+.md-body ol {
+  @apply list-decimal pl-6 my-2;
+}
+.md-body a {
+  @apply text-pink underline break-all;
+}
+.md-body table {
+  @apply w-full my-3 border-2 border-ink text-[13px];
+}
+.md-body th,
+.md-body td {
+  @apply border border-ink px-2 py-1;
+}
+.md-body code {
+  @apply font-mono text-[12.5px] bg-ink/10 px-1 rounded;
+}
+.md-body pre {
+  @apply bg-ink text-paper p-3 rounded-xl overflow-auto my-3;
+}
+.md-body pre code {
+  @apply bg-transparent text-paper;
+}

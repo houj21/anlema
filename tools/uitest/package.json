@@ -1,0 +1,15 @@
+{
+  "name": "zhuang-le-ma-uitest",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "「装了吗」前端冒烟脚本（Playwright）：浏览器视角跑桌面端与管理后台",
+  "scripts": {
+    "serve": "node serve.mjs",
+    "web": "node run.mjs",
+    "electron": "node electron.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  }
+}

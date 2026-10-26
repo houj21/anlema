@@ -1,0 +1,19 @@
+# 依赖
+node_modules/
+
+# 构建产物（需要运行 dist，但不进版本库）
+desktop/dist/
+admin/dist/
+desktop/release/
+
+# 数据库与运行日志
+server/data/
+*.db
+*.log
+
+# 本地配置（含密钥，务必不要提交）
+server/.env
+
+# 临时
+.uitest/
+.DS_Store

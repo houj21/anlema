@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+    background-image: radial-gradient(circle at 12% 18%, #ffe9be 0 2px, transparent 3px),
+      radial-gradient(circle at 62% 8%, #ffd9ec 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 62%, #d5f8ff 0 2px, transparent 3px);
+    background-size: 120px 120px, 160px 160px, 200px 200px;
+  }
+
+  ::selection {
+    @apply bg-lime text-ink;
+  }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-ink/25 rounded-full border-2 border-transparent bg-clip-padding;
+  }
+}
+
+@layer components {
+  .sticker {
+    @apply border-[3px] border-ink rounded-2xl shadow-sticker bg-white;
+  }
+
+  .sticker-sm {
+    @apply border-2 border-ink rounded-xl shadow-stickerSm;
+  }
+
+  .btn-pop {
+    @apply transition-transform duration-100 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
+  }
+
+  .tape {
+    background: repeating-linear-gradient(
+      45deg,
+      #ffd98a,
+      #ffd98a 6px,
+      #ffc95f 6px,
+      #ffc95f 12px
+    );
+  }
+}
+
+/* Markdown 正文 */
+.md-body {
+  @apply text-[15px] leading-relaxed text-ink/90;
+}
+.md-body h2 {
+  @apply font-fun text-xl mt-7 mb-3 text-ink border-l-[6px] border-lime pl-3;
+}
+.md-body h3 {
+  @apply font-display font-bold text-lg mt-5 mb-2;
+}
+.md-body p {
+  @apply my-2;
+}
+.md-body ul {
+  @apply list-disc pl-6 my-2 space-y-1;
+}
+.md-body ol {
+  @apply list-decimal pl-6 my-2 space-y-1;
+}
+.md-body li::marker {
+  @apply text-pink;
+}
+.md-body a {
+  @apply text-pink underline decoration-wavy underline-offset-4 break-all;
+}
+.md-body blockquote {
+  @apply border-l-4 border-cyan bg-cyan/10 rounded-r-lg px-4 py-2 my-3 text-ink/70;
+}
+.md-body table {
+  @apply w-full my-3 border-[3px] border-ink rounded-lg overflow-hidden text-sm;
+}
+.md-body thead {
+  @apply bg-cream;
+}
+.md-body th,
+.md-body td {
+  @apply border-2 border-ink px-3 py-2 text-left align-top;
+}
+.md-body strong {
+  @apply font-bold bg-lime/40 px-1 rounded;
+}
+.md-body code {
+  @apply font-mono text-[13px] bg-ink/10 px-1.5 py-0.5 rounded;
+}
+.md-body hr {
+  @apply my-6 border-t-[3px] border-dashed border-ink/30;
+}
