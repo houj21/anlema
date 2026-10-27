@@ -653,7 +653,8 @@ export default function App() {
                 className="h-11 w-full rounded-xl border-[3px] border-ink bg-white px-3 font-mono text-[13px] outline-none"
               />
               <p className="text-[12.5px] text-ink/60">
-                默认是 <code className="font-mono">http://127.0.0.1:8899</code>，改之前记得先把服务端跑起来。
+                安装版默认连线上服务。想连本机后端就填{' '}
+                <code className="font-mono">http://127.0.0.1:8899</code>，记得先把服务端跑起来。
               </p>
               <Button
                 variant="lime"

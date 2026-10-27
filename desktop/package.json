@@ -3,6 +3,7 @@
   "productName": "装了吗",
   "version": "1.0.0",
   "description": "今天你装了吗？一句话装好编程软件",
+  "author": "houj21 <houj21@users.noreply.github.com>",
   "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
@@ -13,6 +14,7 @@
     "start": "vite build && electron .",
     "start:built": "electron .",
     "dist:win": "vite build && electron-builder --win --x64",
+    "dist:mac": "vite build && electron-builder --mac",
     "dist:dir": "vite build && electron-builder --win --dir"
   },
   "build": {
@@ -37,6 +39,18 @@
       ],
       "icon": "build/icon.ico",
       "artifactName": "装了吗-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.developer-tools",
+      "artifactName": "装了吗-${version}-${arch}.${ext}",
+      "identity": null
     },
     "nsis": {
       "oneClick": false,

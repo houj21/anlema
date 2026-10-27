@@ -31,8 +31,14 @@ export interface Plan {
 
 const KEY = 'zlm:api-base'
 
+// 打包版默认连线上后端；本地开发由 .env.development 覆盖为 127.0.0.1:8899。
+// 用户在设置里手动填过的地址优先级最高（存 localStorage）。
+const DEFAULT_BASE =
+  (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, '') ||
+  'http://127.0.0.1:8899'
+
 export function getApiBase() {
-  return localStorage.getItem(KEY) || 'http://127.0.0.1:8899'
+  return localStorage.getItem(KEY) || DEFAULT_BASE
 }
 
 export function setApiBase(v: string) {

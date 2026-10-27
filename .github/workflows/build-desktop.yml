@@ -1,0 +1,79 @@
+name: Build Desktop App
+
+# 两种触发方式：推 tag 自动出正式包并创建 Release；也可以在 Actions 页面手动跑
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: 构建 ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows
+            script: dist:win
+            artifact: windows
+          - os: macos-latest
+            label: macOS
+            script: dist:mac
+            artifact: macos
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: 安装依赖
+        working-directory: desktop
+        run: npm ci
+
+      - name: 打包
+        working-directory: desktop
+        run: npm run ${{ matrix.script }}
+        env:
+          # 没有签名证书，关掉自动查找，否则构建会因为找不到证书失败
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.artifact }}
+          path: |
+            desktop/release/*.exe
+            desktop/release/*.dmg
+            desktop/release/*.zip
+            desktop/release/*.blockmap
+            desktop/release/*.yml
+          if-no-files-found: warn
+
+  release:
+    name: 创建 Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: 装了吗 ${{ github.ref_name }}
+          draft: false
+          generate_release_notes: true
+          files: artifacts/**/*
