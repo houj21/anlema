@@ -216,14 +216,17 @@ def latest_version(db: Session, sw: Software) -> str | None:
 
 
 async def _upgrade_in_background(plan_id: int, software: dict, version: str, platform: str) -> None:
-    """AI 写好后在后台把模板方案升级成 AI 方案（用户已经拿到模板，不用干等）。"""
+    """AI 写好后在后台把模板方案升级成 AI 方案（用户已经拿到模板，不用干等）。
+
+    线上预算受 Vercel 函数 maxDuration 约束，不能像本地那样给 600 秒；
+    这里留 240 秒，配合 vercel.json 里 300 秒的上限，把超时风险压到最低。
+    """
     from .database import SessionLocal  # 局部导入，避免循环引用
 
     db = SessionLocal()
     try:
-        # 后台跑，用户不用干等，给足预算（AI 写完整方案实测要 3-6 分钟）
         md, summary, by, _official = await planner.generate_plan_md(
-            software, version, platform, timeout=600
+            software, version, platform, timeout=240
         )
         if by != "ai":
             logger.info("后台升级未拿到 AI 方案（来源=%s），保留模板", by)
@@ -248,7 +251,8 @@ async def _upgrade_in_background(plan_id: int, software: dict, version: str, pla
 
 async def get_or_create_plan(db: Session, software_key: str, version: str | None,
                              platform: str, force: bool = False,
-                             fast: bool = False) -> Plan | None:
+                             fast: bool = False,
+                             background_tasks=None) -> Plan | None:
     sw = await resolve_software(db, software_key)
     if not sw:
         return None
@@ -296,9 +300,17 @@ async def get_or_create_plan(db: Session, software_key: str, version: str | None
             db.add(plan)
         db.commit()
         db.refresh(plan)
-        asyncio.create_task(
-            _upgrade_in_background(plan.id, software_to_dict(sw), version, platform)
-        )
+        if background_tasks is not None:
+            # serverless：交给 BackgroundTasks，runtime 才会等任务跑完；
+            # asyncio.create_task 起的任务在响应返回后会被直接回收。
+            background_tasks.add_task(
+                _upgrade_in_background, plan.id, software_to_dict(sw), version, platform
+            )
+        else:
+            # 本地 / 常驻进程：协程方式即可
+            asyncio.create_task(
+                _upgrade_in_background(plan.id, software_to_dict(sw), version, platform)
+            )
         return plan
 
     md, summary, by, official = await planner.generate_plan_md(

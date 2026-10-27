@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
+from ..config import settings
 from ..database import get_db
 from ..models import Feedback, Plan, StatEvent
+from ..ratelimit import ai_quota_left, check_rate
 from ..schemas import GenerateIn, PlanUpdateIn, model_to_dict
 from ..service import get_or_create_plan, normalize_platform, record_event
 
@@ -11,10 +13,17 @@ router = APIRouter(prefix="/api", tags=["plans"])
 
 
 @router.post("/plans/generate")
-async def generate(payload: GenerateIn, db: Session = Depends(get_db)):
+async def generate(payload: GenerateIn, request: Request, background_tasks: BackgroundTasks,
+                   db: Session = Depends(get_db)):
+    # 第一层：单 IP 频率限制，挡住脚本连续调用
+    check_rate(request, key="generate", limit=settings.GENERATE_RATE_LIMIT, window=60)
     platform = normalize_platform(payload.platform) or "windows"
+    # 第二层：当天 AI 总额度用完就只返回模板，不再触发后台生成
+    if background_tasks is not None and not ai_quota_left(db, per_day=settings.AI_DAILY_QUOTA):
+        background_tasks = None
     plan = await get_or_create_plan(
-        db, payload.software, payload.version, platform, payload.force, payload.fast
+        db, payload.software, payload.version, platform, payload.force, payload.fast,
+        background_tasks=background_tasks,
     )
     if not plan:
         raise HTTPException(404, "没找到这个软件")

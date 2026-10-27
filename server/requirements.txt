@@ -5,3 +5,5 @@ httpx>=0.26
 pydantic>=2.5
 pydantic-settings>=2.1
 python-dotenv>=1.0
+# 云端 libSQL 方言：官方只提供 Linux/macOS 二进制，Windows 本地开发自动跳过
+sqlalchemy-libsql; platform_system != "Windows"

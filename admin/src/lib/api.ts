@@ -45,10 +45,25 @@ export const getToken = () => localStorage.getItem(TOKEN_KEY) || ''
 export const setToken = (t: string) => localStorage.setItem(TOKEN_KEY, t)
 export const clearToken = () => localStorage.removeItem(TOKEN_KEY)
 
-const BASE = import.meta.env.DEV ? '' : (localStorage.getItem('zlm:admin-base') || 'http://127.0.0.1:8899')
+const BASE_KEY = 'zlm:admin-base'
+export const DEFAULT_BASE = import.meta.env.DEV ? '' : 'http://127.0.0.1:8899'
+
+/** 后端地址：URL 参数 ?api= 优先（方便直接分享带地址的链接），其次本地设置，最后默认值 */
+export function getBase() {
+  if (import.meta.env.DEV) return ''
+  const fromUrl = new URLSearchParams(location.search).get('api')
+  if (fromUrl) return fromUrl.trim().replace(/\/+$/, '')
+  return localStorage.getItem(BASE_KEY) || DEFAULT_BASE
+}
+
+export function setBase(b: string) {
+  const v = (b || '').trim().replace(/\/+$/, '')
+  if (v) localStorage.setItem(BASE_KEY, v)
+  else localStorage.removeItem(BASE_KEY)
+}
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${getBase()}${path}`, {
     headers: {
       'Content-Type': 'application/json',
       'X-Admin-Token': getToken(),

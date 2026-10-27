@@ -1,0 +1,21 @@
+# Vercel CLI 上传时不看 .gitignore，只看 .vercelignore。
+# 必须在这里排除 .env，否则 AI 密钥会被打进部署产物。
+.env
+.env.*
+!.env.example
+
+# 数据库与日志：serverless 上是临时数据，没必要上传
+data/
+*.db
+*.db-journal
+.server.log
+.server.err.log
+
+# 测试与一次性脚本：不进生产产物
+tests/
+tools/
+
+# 缓存与本地构建产物
+__pycache__/
+*.pyc
+.vercel/

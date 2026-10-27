@@ -62,7 +62,16 @@ class Settings:
     HOST: str = _pick("HOST", "0.0.0.0")
     PORT: int = int(_pick("PORT", "8899"))
     DB_PATH: Path = Path(_pick("DB_PATH", str(BASE_DIR / "data" / "anlema.db")))
+    # 云端库（Turso / libSQL）：配了就走远程，留空则用本地 SQLite 文件
+    TURSO_DATABASE_URL: str = _pick("TURSO_DATABASE_URL", "")
+    TURSO_AUTH_TOKEN: str = _pick("TURSO_AUTH_TOKEN", "")
     CORS_ORIGINS: str = _pick("CORS_ORIGINS", "*")
+
+    # ---- 限流与额度 ----
+    # 单 IP 每分钟最多触发几次方案生成（0 表示不限制）
+    GENERATE_RATE_LIMIT: int = int(_pick("GENERATE_RATE_LIMIT", "3"))
+    # 每天最多跑几次 AI 生成，防止接口被刷爆模型额度（0 表示不限制）
+    AI_DAILY_QUOTA: int = int(_pick("AI_DAILY_QUOTA", "100"))
 
     # ---- 管理后台 ----
     ADMIN_USERNAME: str = _pick("ADMIN_USERNAME", "admin")

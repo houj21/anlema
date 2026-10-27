@@ -45,11 +45,15 @@ async def on_startup():
     n = seed()
     logger.info("预置软件初始化完成，新增 %d 个", n)
     # 把生效的 AI 凭证写回 .env，方便下次直接读取
-    write_env_file(
-        ANTHROPIC_AUTH_TOKEN=settings.ANTHROPIC_AUTH_TOKEN,
-        ANTHROPIC_BASE_URL=settings.ANTHROPIC_BASE_URL,
-        LLM_MODEL=settings.LLM_MODEL,
-    )
+    # （Vercel 上文件系统只读，写不了，忽略即可：凭证本来就是环境变量给的）
+    try:
+        write_env_file(
+            ANTHROPIC_AUTH_TOKEN=settings.ANTHROPIC_AUTH_TOKEN,
+            ANTHROPIC_BASE_URL=settings.ANTHROPIC_BASE_URL,
+            LLM_MODEL=settings.LLM_MODEL,
+        )
+    except OSError:
+        logger.info("文件系统只读，跳过写回 .env（serverless 环境正常）")
     if settings.ai_enabled:
         logger.info("AI 已启用：base=%s model=%s", settings.ANTHROPIC_BASE_URL, settings.LLM_MODEL)
     else:

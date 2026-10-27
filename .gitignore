@@ -14,6 +14,14 @@ server/data/
 # 本地配置（含密钥，务必不要提交）
 server/.env
 
+# Python 缓存（曾经被误提交，已从版本库移除）
+__pycache__/
+*.pyc
+
+# Vercel / IDE 本地数据
+server/.vercel/
+.codebuddy/
+
 # 临时
 .uitest/
 .DS_Store

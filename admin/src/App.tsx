@@ -11,18 +11,88 @@ import {
   PenLine,
   RefreshCw,
   Search,
+  Server,
+  Settings,
   Sparkles,
   Trash2,
   X,
 } from 'lucide-react'
 import { Badge, Button, Card, Input, Textarea } from '@/components/ui'
 import { BarList } from '@/components/Bar'
-import { api, clearToken, getToken, setToken, type Feedback, type Plan, type Stats } from '@/lib/api'
+import {
+  api,
+  clearToken,
+  getBase,
+  getToken,
+  setBase,
+  setToken,
+  type Feedback,
+  type Plan,
+  type Stats,
+} from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 type Tab = 'plans' | 'feedbacks' | 'stats'
 
-function Login({ onOk }: { onOk: () => void }) {
+/** 后端地址设置：部署到线上后，页面要连哪个服务端就在这里填 */
+function ServerDialog({ onClose }: { onClose: () => void }) {
+  const [v, setV] = useState(getBase())
+  const [msg, setMsg] = useState('')
+  const [testing, setTesting] = useState(false)
+
+  const test = async () => {
+    setTesting(true)
+    setMsg('')
+    try {
+      const res = await fetch(`${v.trim().replace(/\/+$/, '')}/api/health`)
+      const j = await res.json()
+      setMsg(j.ok ? `✅ 连上了（AI ${j.ai_enabled ? '在线' : '未启用'}）` : '❌ 地址能访问，但返回的不是装了吗的服务端')
+    } catch {
+      setMsg('❌ 连不上。检查：地址对不对、服务端有没有起、HTTPS 页面访问 http 地址会被浏览器拦')
+    } finally {
+      setTesting(false)
+    }
+  }
+
+  const save = () => {
+    setBase(v)
+    location.reload()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-6" onClick={onClose}>
+      <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <Card className="animate-pop">
+          <div className="border-b-[3px] border-ink bg-cream px-6 py-4">
+            <div className="font-fun text-lg">服务端地址</div>
+            <div className="font-mono text-[11.5px] text-ink/55">
+              线上页面读不到数据时，把后端地址填在这里
+            </div>
+          </div>
+          <div className="space-y-3 p-6">
+            <Input value={v} placeholder="例如 http://1.2.3.4:8899" onChange={(e) => setV(e.target.value)} />
+            {msg && <div className="text-[13px]">{msg}</div>}
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={test} disabled={testing || !v.trim()}>
+                {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Server className="h-4 w-4" />} 测试连接
+              </Button>
+              <Button variant="lime" className="flex-1" onClick={save}>
+                保存并刷新
+              </Button>
+            </div>
+            <div className="font-mono text-[11.5px] leading-relaxed text-ink/45">
+              留空则回到默认 http://127.0.0.1:8899（只有本机能用）。
+              <br />
+              也可以在网址后面加 ?api=http://1.2.3.4:8899 直接指定。
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+function Login({ onOk, onOpenServer }: { onOk: () => void; onOpenServer: () => void }) {
   const [pwd, setPwd] = useState('')
   const [err, setErr] = useState('')
   const [loading, setLoading] = useState(false)
@@ -64,6 +134,12 @@ function Login({ onOk }: { onOk: () => void }) {
           <div className="text-center font-mono text-[11.5px] text-ink/45">
             默认口令 zhuanglma（可在 server/.env 改 ADMIN_PASSWORD）
           </div>
+          <button
+            onClick={onOpenServer}
+            className="mx-auto flex items-center gap-1.5 font-mono text-[11.5px] text-ink/55 underline decoration-dotted hover:text-ink"
+          >
+            <Settings className="h-3 w-3" /> 服务端地址：{getBase() || '同源'}
+          </button>
         </div>
       </Card>
     </div>
@@ -151,6 +227,7 @@ function PlanEditor({ plan, onClose, onSaved }: { plan: Plan; onClose: () => voi
 
 export default function App() {
   const [token, setTok] = useState(getToken())
+  const [showServer, setShowServer] = useState(false)
   const [tab, setTab] = useState<Tab>('plans')
   const [plans, setPlans] = useState<Plan[]>([])
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
@@ -197,7 +274,13 @@ export default function App() {
     [feedbacks, filterStatus]
   )
 
-  if (!token) return <Login onOk={() => setTok(getToken())} />
+  if (!token)
+    return (
+      <>
+        <Login onOk={() => setTok(getToken())} onOpenServer={() => setShowServer(true)} />
+        {showServer && <ServerDialog onClose={() => setShowServer(false)} />}
+      </>
+    )
 
   const tabs: { key: Tab; label: string; icon: any }[] = [
     { key: 'plans', label: '方案管理', icon: LayoutDashboard },
@@ -220,6 +303,9 @@ export default function App() {
             </Badge>
           </div>
           <div className="flex items-center gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setShowServer(true)}>
+              <Settings className="h-3.5 w-3.5" /> 服务端地址
+            </Button>
             <Button size="sm" variant="outline" onClick={load} disabled={loading}>
               <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} /> 刷新
             </Button>
@@ -446,6 +532,7 @@ export default function App() {
       </div>
 
       {editing && <PlanEditor plan={editing} onClose={() => setEditing(null)} onSaved={load} />}
+      {showServer && <ServerDialog onClose={() => setShowServer(false)} />}
     </div>
   )
 }
