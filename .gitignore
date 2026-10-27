@@ -25,3 +25,6 @@ server/.vercel/
 # 临时
 .uitest/
 .DS_Store
+
+# 临时排查脚本（以 . 开头，不进版本库）
+/.*.py
