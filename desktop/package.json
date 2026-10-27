@@ -1,6 +1,6 @@
 {
   "name": "zhuang-le-ma",
-  "productName": "装了吗",
+  "productName": "ZhuangLeMa",
   "version": "1.0.0",
   "description": "今天你装了吗？一句话装好编程软件",
   "author": "houj21 <houj21@users.noreply.github.com>",
@@ -13,14 +13,15 @@
     "build": "vite build",
     "start": "vite build && electron .",
     "start:built": "electron .",
-    "dist:win": "vite build && electron-builder --win --x64",
-    "dist:mac": "vite build && electron-builder --mac",
+    "dist:win": "vite build && electron-builder --win --x64 --publish never",
+    "dist:mac": "vite build && electron-builder --mac --publish never",
     "dist:dir": "vite build && electron-builder --win --dir"
   },
   "build": {
     "appId": "com.zhuanglma.desktop",
-    "productName": "装了吗",
+    "productName": "ZhuangLeMa",
     "copyright": "装了吗 · 今天你装了吗？",
+    "publish": [],
     "directories": {
       "output": "release",
       "buildResources": "build"

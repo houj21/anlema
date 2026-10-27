@@ -21,10 +21,6 @@ jobs:
             label: Windows
             script: dist:win
             artifact: windows
-          - os: macos-latest
-            label: macOS
-            script: dist:mac
-            artifact: macos
 
     runs-on: ${{ matrix.os }}
 
@@ -47,7 +43,8 @@ jobs:
         env:
           # 没有签名证书，关掉自动查找，否则构建会因为找不到证书失败
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 不注入 GH_TOKEN：否则 electron-builder 会尝试自己发 Release，
+          # 与下面的 release job 冲突。发布统一交给 softprops/action-gh-release
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
@@ -55,8 +52,6 @@ jobs:
           name: desktop-${{ matrix.artifact }}
           path: |
             desktop/release/*.exe
-            desktop/release/*.dmg
-            desktop/release/*.zip
             desktop/release/*.blockmap
             desktop/release/*.yml
           if-no-files-found: warn
