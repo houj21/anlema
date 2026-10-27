@@ -1,7 +1,7 @@
 {
   "name": "zhuang-le-ma",
   "productName": "ZhuangLeMa",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "今天你装了吗？一句话装好编程软件",
   "author": "houj21 <houj21@users.noreply.github.com>",
   "main": "electron/main.cjs",
@@ -39,7 +39,7 @@
         }
       ],
       "icon": "build/icon.ico",
-      "artifactName": "装了吗-Setup-${version}.${ext}"
+      "artifactName": "ZhuangLeMa-Setup-${version}.${ext}"
     },
     "mac": {
       "target": [
