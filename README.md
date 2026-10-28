@@ -6,6 +6,8 @@
 
 一个帮学编程的同学「一键装软件」的小系统，由三部分组成：
 
+> 想了解系统全貌？看 [平台整体设计](docs/architecture.md)（三端架构图 + 核心功能 + 详细设计）。
+
 | 部分 | 技术栈 | 目录 |
 | --- | --- | --- |
 | 桌面 APP（用户端） | Electron + React + Tailwind（Shadcn 风格组件） | `desktop/` |
@@ -18,6 +20,7 @@
 
 | 文档 | 内容 |
 | --- | --- |
+| [平台整体设计](docs/architecture.md) | **先看这篇**：三端架构图、核心功能、数据模型、三端详细设计、决策记录 |
 | [后端架构设计](docs/backend-architecture.md) | 为什么从 `/tmp` SQLite 换成 Turso、双引擎原理、AI 超时改造、限流与 CORS |
 | [后端运维手册](docs/operations.md) | 环境变量清单、数据迁移、部署流程、验证清单、故障排查 |
 | [桌面端打包与分发](docs/desktop-release.md) | Windows 打包、GitHub Actions 自动发布、签名方案、打包踩坑 |
