@@ -9,7 +9,7 @@
 | 部分 | 技术栈 | 目录 |
 | --- | --- | --- |
 | 桌面 APP（用户端） | Electron + React + Tailwind（Shadcn 风格组件） | `desktop/` |
-| 服务端 | Python FastAPI + SQLite | `server/` |
+| 服务端 | Python FastAPI + SQLite（本地）/ Turso（线上，双引擎） | `server/` |
 | Web 管理后台 | React + Tailwind | `admin/` |
 
 ---
@@ -20,10 +20,14 @@
 | --- | --- |
 | [后端架构设计](docs/backend-architecture.md) | 为什么从 `/tmp` SQLite 换成 Turso、双引擎原理、AI 超时改造、限流与 CORS |
 | [后端运维手册](docs/operations.md) | 环境变量清单、数据迁移、部署流程、验证清单、故障排查 |
+| [桌面端打包与分发](docs/desktop-release.md) | Windows 打包、GitHub Actions 自动发布、签名方案、打包踩坑 |
+| [本地开发指南](docs/development.md) | 三端同时跑起来、后端地址三套来源、功能对比、UI 复用现状 |
 
 ---
 
 ## 快速开始
+
+端口一览：服务端 `8899`、桌面端渲染进程 `5173`（Electron 窗口自动拉起）、管理后台 `5180`。
 
 ### 0. 环境要求
 
@@ -166,12 +170,15 @@ node electron.mjs     # 真实 Electron 窗口：一键安装执行链路 7 项
 
 ```powershell
 cd desktop
-npm run dist:win      # 产出 release/装了吗-Setup-1.0.0.exe（NSIS，可选安装目录）
+npm run dist:win      # 产出 release/ZhuangLeMa-Setup-<version>.exe（NSIS，可选安装目录）
 npm run dist:dir      # 只产出 release/win-unpacked/ 绿色版，不压安装包
 ```
 
 配置写在 `desktop/package.json` 的 `build` 字段：appId、productName、图标（`build/icon.ico`）、
 NSIS（中文界面、允许改安装目录、创建桌面/开始菜单快捷方式）。
+
+推一个 `v*` tag 会自动在 GitHub Actions 上构建 Windows 包并发布到 Release，
+完整流程见 [docs/desktop-release.md](docs/desktop-release.md)。
 
 > 国内网络提示：electron-builder 需要从 GitHub 下载 nsis / winCodeSign 等二进制，
 > 直连常 `ETIMEDOUT`。加镜像即可：
@@ -201,6 +208,9 @@ anlema/
 │   ├── electron/preload.cjs
 │   └── src/                 # React UI
 ├── admin/                   # 管理后台（React）
+├── tools/uitest/            # Playwright 前端冒烟
+├── docs/                    # 架构 / 运维 / 打包 / 开发指南
+├── .github/workflows/       # 打 tag 自动构建 Windows 包并发布 Release
 └── PROGRESS.md              # 开发进度与踩坑记录
 ```
 
@@ -213,3 +223,10 @@ anlema/
 - PowerShell 5.1 会把无 BOM 的 UTF-8 脚本当 ANSI 读，中文注释会乱码 —— 桌面端落盘脚本时
   已自动加 BOM 并在开头强制 UTF-8 输出。
 - 「一键安装」会真实执行安装命令，请确认方案内容可信；提权模式会弹 UAC / 输入密码。
+- 打包相关（productName 必须英文、CI 里别注入 `GH_TOKEN`、静默安装要带 `/D`）
+  见 [docs/desktop-release.md](docs/desktop-release.md)。
+- 后端 CORS 已收紧为白名单：新增前端域名要同步改 `CORS_ORIGINS` 再重新部署。
+- 方案生成有两层限流（3 次/分钟/IP + 100 次/天全局），用 `GENERATE_RATE_LIMIT`、
+  `AI_DAILY_QUOTA` 调整，见 [docs/operations.md](docs/operations.md)。
+- 桌面端与管理后台的 UI 组件是各自复制的（Button / Card / Badge），**改样式要改两处**。
+- 管理后台登录页把默认口令提示写在了页面上，线上部署前建议隐藏。

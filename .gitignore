@@ -22,6 +22,11 @@ __pycache__/
 server/.vercel/
 .codebuddy/
 
+# Playwright 临时产物（快照 / 截图 / 控制台日志）
+# 只忽略根目录截图，desktop/build/icon.png 是 macOS 打包必需，不能忽略
+.playwright-cli/
+/*.png
+
 # 临时
 .uitest/
 .DS_Store
